@@ -9,4 +9,4 @@ void init_lcd();
 
 void init_encoder();
 
-_Noreturn void encoder_run_demo();
+_Noreturn void encoder_run_demo(lv_obj_t **screens, int n);

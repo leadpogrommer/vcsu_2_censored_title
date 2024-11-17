@@ -36,15 +36,19 @@ static lv_obj_t *create_sample_obj(char *s) {
 
 #define TAG "encoder"
 
-_Noreturn void encoder_run_demo(){
+_Noreturn void encoder_run_demo(lv_obj_t **screens, int n){
+//    lvgl_port_lock(0);
+//    lv_obj_t *screens[3] = {
+//            create_sample_obj("1 First"),
+//            create_sample_obj("2 Second"),
+//            create_sample_obj("3 Third"),
+//    };
+//    lvgl_port_unlock();
+    int cscr = 0;
+
     lvgl_port_lock(0);
-    lv_obj_t *screens[3] = {
-            create_sample_obj("1 First"),
-            create_sample_obj("2 Second"),
-            create_sample_obj("3 Third"),
-    };
+    lv_scr_load_anim(screens[cscr], LV_SCR_LOAD_ANIM_MOVE_RIGHT , 500, 0, false);
     lvgl_port_unlock();
-    int cscr = 2;
 
 
     ESP_LOGI(TAG, "Encoder demo loop starting...");
@@ -56,8 +60,8 @@ _Noreturn void encoder_run_demo(){
             rotary_encoder_direction_t dir = event.state.direction;
             if (dir == ROTARY_ENCODER_DIRECTION_NOT_SET) continue;
             cscr += dir == ROTARY_ENCODER_DIRECTION_CLOCKWISE ? 1 : -1;
-            if(cscr < 0) cscr = 2;
-            cscr %= 3;
+            if(cscr < 0) cscr = n-1;
+            cscr %= n;
             lvgl_port_lock(0);
             lv_scr_load_anim(screens[cscr], dir != ROTARY_ENCODER_DIRECTION_CLOCKWISE ? LV_SCR_LOAD_ANIM_MOVE_RIGHT : LV_SCR_LOAD_ANIM_MOVE_LEFT, 500, 0, false);
             lvgl_port_unlock();

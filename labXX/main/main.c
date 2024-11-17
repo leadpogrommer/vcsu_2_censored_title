@@ -34,10 +34,13 @@ _Noreturn void app_main() {
     init_encoder();
 
 
-    gui_task_t *task = run_js_task("var flyer = new LVGLLabel();\nvar stats = new LVGLLabel();\n\nflyer.text = \"X\"\nvar x = 0;\nvar y = 0;\nvar dirx = 1;\nvar diry = 1\n\n\nfunction do_update(){\n    x += dirx;\n    y += diry;\n    if(x > 118 || x == 0) dirx = - dirx;\n    if(y > 54 || y == 0) diry = - diry;\n    flyer.x = x;\n    flyer.y = y;\n    stats.text = \"x=\"+x+\"\\ny=\"+y;\n}");
-    lvgl_port_lock(0);
-    lv_scr_load(task->screen);
-    lvgl_port_unlock();
+    gui_task_t *task1 = run_js_task("var flyer = new LVGLLabel();\nvar stats = new LVGLLabel();\n\nflyer.text = \"X\"\nvar x = 0;\nvar y = 0;\nvar dirx = 1;\nvar diry = 1\n\n\nfunction do_update(){\n    x += dirx;\n    y += diry;\n    if(x > 118 || x == 0) dirx = - dirx;\n    if(y > 54 || y == 0) diry = - diry;\n    flyer.x = x;\n    flyer.y = y;\n    stats.text = \"x=\"+x+\"\\ny=\"+y;\n}");
+    gui_task_t *task2 = run_js_task("var lbl = new LVGLLabel();\nvar  tick = 0;\n\nfunction do_update(){\n    lbl.text = \"Tick \" + (tick++);\n}");
+//    lvgl_port_lock(0);
+//    lv_scr_load(task1->screen);
+//    lvgl_port_unlock();
+    lv_obj_t *screens[] = {task1->screen, task2->screen};
+    encoder_run_demo(screens, 2);
 
     while (1) {
         vTaskDelay(1000/portTICK_PERIOD_MS);
@@ -54,5 +57,5 @@ _Noreturn void app_main() {
     }
 
 
-//    encoder_run_demo();
+
 }
