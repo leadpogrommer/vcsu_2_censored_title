@@ -93,7 +93,7 @@ duk_ret_t lp_bi_lvgl_obj_setter(duk_context *ctx){
     }
     lvgl_port_unlock();
 
-    printf("Setter called! %d = %d\n", magic, value);
+//    printf("Setter called! %d = %d\n", magic, value);
     return 0;
 }
 

@@ -67,7 +67,7 @@ void init_lcd(){
         .panel_handle = panel_handle,
         .control_handle = 0,
         .buffer_size = 128 * 64,
-        .double_buffer = false,
+        .double_buffer = true,
         .trans_size = 0,
         .hres = 128,
         .vres = 64,
@@ -82,12 +82,13 @@ void init_lcd(){
             .buff_dma = 1,
             .buff_spiram = 0,
             .sw_rotate = 0,
-            .full_refresh = 1, // TODO: maybe remove this
+//            .full_refresh = 1, // TODO: maybe remove this
             .direct_mode = 0,
         },
     };
 
     lvgl_port_cfg_t port_cfg = ESP_LVGL_PORT_INIT_CONFIG();
+    port_cfg.task_max_sleep_ms = 30; // For some reason, lvgl (or _port) incorrectly calculates delay until next timer, so it's capped here to prevent render lag
     lvgl_port_init(&port_cfg);
 
     disp = lvgl_port_add_disp(&display_cfg);
