@@ -10,6 +10,9 @@
 
 #include "labXX.h"
 
+
+lv_display_t *disp = NULL;
+
 void init_lcd(){
     i2c_master_bus_handle_t i2c_bus = NULL;
     i2c_master_bus_config_t bus_config = {
@@ -87,17 +90,16 @@ void init_lcd(){
     lvgl_port_cfg_t port_cfg = ESP_LVGL_PORT_INIT_CONFIG();
     lvgl_port_init(&port_cfg);
 
-    lv_display_t* disp = lvgl_port_add_disp(&display_cfg);
+    disp = lvgl_port_add_disp(&display_cfg);
 
 
     // test
     lvgl_port_lock(0);
     lv_obj_t *label_ = lv_label_create(lv_disp_get_scr_act(disp));
-    lv_label_set_text(label_, "Init++");
+    lv_label_set_text(label_, "Init pc");
     lv_obj_set_width(label_, 128);
     lv_obj_set_height(label_, 64);
     lv_obj_set_x(label_, 30);
     lv_obj_set_y(label_, 30);
     lvgl_port_unlock();
-//    lv_obj_redraw;
 }
