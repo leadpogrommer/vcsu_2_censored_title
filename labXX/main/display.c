@@ -8,7 +8,7 @@
 #include <esp_lvgl_port.h>
 #include <lvgl.h>
 
-#include "labXX.h"
+#include "main.h"
 
 
 lv_display_t *disp = NULL;
@@ -61,7 +61,7 @@ void init_lcd(){
 
 
     // lvgl stuff
-    printf("Starting lvgl");
+    printf("Starting lvgl\n");
     const lvgl_port_display_cfg_t display_cfg = {
         .io_handle = io_handle,
         .panel_handle = panel_handle,
@@ -96,9 +96,9 @@ void init_lcd(){
     // test
     lvgl_port_lock(0);
     lv_obj_t *label_ = lv_label_create(lv_disp_get_scr_act(disp));
-    lv_label_set_text(label_, "Init pc");
-    lv_obj_set_width(label_, 128);
-    lv_obj_set_height(label_, 64);
+    lv_label_set_text(label_, "Init");
+//    lv_obj_set_width(label_, 128);
+//    lv_obj_set_height(label_, 64);
     lv_obj_set_x(label_, 30);
     lv_obj_set_y(label_, 30);
     lvgl_port_unlock();
