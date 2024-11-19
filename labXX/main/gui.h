@@ -13,3 +13,7 @@ typedef struct {
 } gui_task_t;
 
 gui_task_t *run_js_task(char* src);
+
+static inline gui_task_t *ct(){
+    return pvTaskGetThreadLocalStoragePointer(NULL, 0);
+}
