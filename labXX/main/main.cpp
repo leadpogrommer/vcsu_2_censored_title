@@ -30,21 +30,21 @@ extern "C" void app_main() {
 //    gui_task_t *task2 = run_js_task("var lbl = new LVGLLabel();\nvar  tick = 0;\n\nfunction do_update(){\n    lbl.text = \"Tick \" + (tick++);\n}");
 //    lv_obj_t *screens[] = {task1->screen, task2->screen};
 //    encoder_run_demo(screens, 2);
-    run_js_task("for(var i = 0; i < 5; i++){\n    const j = i;\n    setTimeout(function () {\n        print(\"Timeout\", j)        \n    }, i*1000);\n}\n\nfunction do_update(){}");
+    run_js_task("\nprint('Timeout sort!')\nfor(var i = 5; i >= 0; i--){\n    setTimeout(function (e) {\n        return function () {\n            print(\"Timeout\", e)\n        }\n    }(i), i*1000);\n}\n");
 
-    while (1) {
-        vTaskDelay(1000/portTICK_PERIOD_MS);
-
-        vTaskGetRunTimeStats(dbg_buffer);
-        printf("%s\n", dbg_buffer);
-
-        uint32_t total_runtime;
-//        int total_tasks = uxTaskGetSystemState(debug_tasks, 32, &total_runtime);
-//        printf("--------- TASK DUMP ---------\n");
-//        for(int i = 0; i < total_tasks; i++){
-//            printf("[%d] %s (bp = %d, cp = %d, runtime = %lu)\n", debug_tasks[i].xTaskNumber, debug_tasks[i].pcTaskName, debug_tasks[i].uxBasePriority, debug_tasks[i].uxCurrentPriority, debug_tasks[i].ulRunTimeCounter);
-//        }
-    }
+//    while (1) {
+//        vTaskDelay(1000/portTICK_PERIOD_MS);
+//
+//        vTaskGetRunTimeStats(dbg_buffer);
+//        printf("%s\n", dbg_buffer);
+//
+//        uint32_t total_runtime;
+////        int total_tasks = uxTaskGetSystemState(debug_tasks, 32, &total_runtime);
+////        printf("--------- TASK DUMP ---------\n");
+////        for(int i = 0; i < total_tasks; i++){
+////            printf("[%d] %s (bp = %d, cp = %d, runtime = %lu)\n", debug_tasks[i].xTaskNumber, debug_tasks[i].pcTaskName, debug_tasks[i].uxBasePriority, debug_tasks[i].uxCurrentPriority, debug_tasks[i].ulRunTimeCounter);
+////        }
+//    }
 
 
 
