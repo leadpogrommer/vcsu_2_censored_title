@@ -1,6 +1,4 @@
 #include <stdio.h>
-#include <esp_lcd_panel_vendor.h>
-// #include <driver/i2c_master.h>
 #include "driver/i2c_master.h"
 #include "esp_lcd_panel_ssd1306.h"
 #include "esp_lcd_panel_ops.h"
@@ -8,7 +6,7 @@
 #include <esp_lvgl_port.h>
 #include <lvgl.h>
 
-#include "main.h"
+#include "display.h"
 
 
 lv_display_t *disp = NULL;
@@ -93,13 +91,9 @@ void init_lcd(){
 
     disp = lvgl_port_add_disp(&display_cfg);
 
-
-    // test
     lvgl_port_lock(0);
     lv_obj_t *label_ = lv_label_create(lv_disp_get_scr_act(disp));
     lv_label_set_text(label_, "Init");
-//    lv_obj_set_width(label_, 128);
-//    lv_obj_set_height(label_, 64);
     lv_obj_set_x(label_, 30);
     lv_obj_set_y(label_, 30);
     lvgl_port_unlock();

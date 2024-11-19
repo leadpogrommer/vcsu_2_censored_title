@@ -4,9 +4,7 @@
 #include <esp_lvgl_port.h>
 
 
-
-
-duk_ret_t lp_bi_lvgl_label_constructor(duk_context *ctx){
+DUK_BI(lp_bi_lvgl_label_constructor){
     fprintf(stderr, "Label constructor called!\n");
     duk_require_constructor_call(ctx);
 
@@ -23,15 +21,13 @@ duk_ret_t lp_bi_lvgl_label_constructor(duk_context *ctx){
 }
 
 
-duk_ret_t lp_bi_lvgl_obj_setter(duk_context *ctx){
+DUK_BI(lp_bi_lvgl_obj_setter){
     duk_int_t value = duk_require_int(ctx, -1);
     duk_push_this(ctx);
     duk_push_string(ctx, "ptr");
     duk_get_prop(ctx, -2);
-    lv_obj_t *obj = duk_require_pointer(ctx, -1);
-//    duk_get_prop();
+    auto *obj = (lv_obj_t *)(duk_require_pointer(ctx, -1));
     int magic = duk_get_current_magic(ctx);
-//    int val = duk_requi
 
     lvgl_port_lock(0);
     switch (magic) {
@@ -56,12 +52,12 @@ duk_ret_t lp_bi_lvgl_obj_setter(duk_context *ctx){
     return 0;
 }
 
-duk_ret_t lp_bi_lvgl_label_setter(duk_context *ctx){
-    char *value= duk_require_string(ctx, -1);
+DUK_BI(lp_bi_lvgl_label_setter){
+    char *value= (char *)duk_require_string(ctx, -1);
     duk_push_this(ctx);
     duk_push_string(ctx, "ptr");
     duk_get_prop(ctx, -2);
-    lv_obj_t *obj = duk_require_pointer(ctx, -1);
+    auto *obj = (lv_obj_t *)duk_require_pointer(ctx, -1);
     int magic = duk_get_current_magic(ctx);
 
     lvgl_port_lock(0);

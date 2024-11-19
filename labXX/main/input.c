@@ -6,6 +6,7 @@
 #include "esp_log.h"
 
 
+#include "input.h"
 QueueHandle_t encoder_raw_event_queue;
 rotary_encoder_info_t encoder_info = { 0 };
 

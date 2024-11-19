@@ -18,8 +18,8 @@ void js_task_loop(gui_task_t *task){
 }
 
 
-gui_task_t *run_js_task(char* src){
-    gui_task_t *task = malloc(sizeof(gui_task_t));
+gui_task_t *run_js_task(const char* src){
+    auto *task = new gui_task_t;
     lvgl_port_lock(0);
     task->screen = lv_obj_create(NULL);
     lvgl_port_unlock();
@@ -34,5 +34,5 @@ gui_task_t *run_js_task(char* src){
 }
 
 
-// TODO: move lvgl bindings to separate file
+
 

@@ -1,29 +1,21 @@
-#include <sys/cdefs.h>
 #include <stdio.h>
-#include <esp_lcd_panel_vendor.h>
-// #include <driver/i2c_master.h>
-#include "driver/i2c_master.h"
-#include "esp_lcd_panel_ssd1306.h"
-#include "esp_lcd_panel_ops.h"
-#include "esp_lcd_panel_io_interface.h"
-#include <esp_lvgl_port.h>
-#include <lvgl.h>
+
 #include "esp_event.h"
 #include "nvs_flash.h"
 #include "esp_log.h"
 
 #include "freertos/FreeRTOS.h"
-#include "rotary_encoder.h"
-#include "main.h"
-#include "gui.h"
 
+#include "input.h"
+#include "gui.h"
+#include "display.h"
 
 #define TAG "main"
 
 struct xTASK_STATUS debug_tasks[32];
 char dbg_buffer[1024*10];
 
-_Noreturn void app_main() {
+extern "C" void app_main() {
     printf("Hello world!\n");
     ESP_ERROR_CHECK(esp_event_loop_create_default());
 
@@ -38,7 +30,6 @@ _Noreturn void app_main() {
 //    gui_task_t *task2 = run_js_task("var lbl = new LVGLLabel();\nvar  tick = 0;\n\nfunction do_update(){\n    lbl.text = \"Tick \" + (tick++);\n}");
 //    lv_obj_t *screens[] = {task1->screen, task2->screen};
 //    encoder_run_demo(screens, 2);
-
     run_js_task("for(var i = 0; i < 5; i++){\n    const j = i;\n    setTimeout(function () {\n        print(\"Timeout\", j)        \n    }, i*1000);\n}\n\nfunction do_update(){}");
 
     while (1) {

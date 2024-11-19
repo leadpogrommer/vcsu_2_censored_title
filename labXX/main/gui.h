@@ -3,6 +3,12 @@
 #include "lvgl.h"
 #include "duktape.h"
 
+#ifndef __cplusplus
+#error "CPP only"
+#endif
+
+#define DUK_BI(name) extern "C" duk_ret_t name(duk_context *ctx)
+
 typedef struct {
     TaskHandle_t rtos_task;
     SemaphoreHandle_t sem; // TODO: use this
@@ -12,8 +18,8 @@ typedef struct {
     // TODO: some logging
 } gui_task_t;
 
-gui_task_t *run_js_task(char* src);
+gui_task_t *run_js_task(const char* src);
 
 static inline gui_task_t *ct(){
-    return pvTaskGetThreadLocalStoragePointer(NULL, 0);
+    return static_cast<gui_task_t *>(pvTaskGetThreadLocalStoragePointer(nullptr, 0));
 }

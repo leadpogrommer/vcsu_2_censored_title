@@ -1,6 +1,6 @@
 #include "esp_wifi.h"
 #include "esp_log.h"
-#include "labXX.h"
+#include "network.h"
 #include "esp_websocket_client.h"
 
 char * getCurrentTaskName(){
@@ -26,7 +26,7 @@ static void wifi_event_handler(void *event_handler_arg, esp_event_base_t event_b
     }
     else if (event_id == IP_EVENT_STA_GOT_IP){
         printf("Wifi got IP...\n\n");
-        connect_to_websocket();
+        // connect_to_websocket(); // TODO: connect
     } else{
         printf("Unknown wifi related event %ld\n", event_id);
     }
