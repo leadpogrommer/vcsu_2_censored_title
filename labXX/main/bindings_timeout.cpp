@@ -42,7 +42,7 @@ void timer_cb(Callback *arg){
 
 // TODO: this does not actually set timeout
 DUK_BI(lp_bi_set_timeout){
-    ESP_LOGI(TAG, "Set timeout called");
+//    ESP_LOGI(TAG, "Set timeout called");
     duk_double_t delay = duk_require_number(ctx, -1);
     duk_require_callable(ctx, -2);
     // [ ... callback duration ]

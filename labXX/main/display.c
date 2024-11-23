@@ -92,6 +92,9 @@ void init_lcd(){
     disp = lvgl_port_add_disp(&display_cfg);
 
     lvgl_port_lock(0);
+    lv_theme_t *theme = lv_theme_mono_init(disp, false, lv_font_default());
+    lv_disp_set_theme(disp, theme);
+
     lv_obj_t *label_ = lv_label_create(lv_disp_get_scr_act(disp));
     lv_label_set_text(label_, "Init");
     lv_obj_set_x(label_, 30);

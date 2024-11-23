@@ -1,8 +1,9 @@
 #include <gui.h>
 
 #include <esp_lvgl_port.h>
-void js_task_loop(gui_task_t *task){
-    vTaskSetThreadLocalStoragePointer(NULL, 0, task);
+
+[[noreturn]] static void js_task_loop(gui_task_t *task){
+    vTaskSetThreadLocalStoragePointer(nullptr, 0, task);
 
     duk_context  *ctx = task->duk_ctx;
 
@@ -12,18 +13,8 @@ void js_task_loop(gui_task_t *task){
     duk_put_prop_literal(ctx, -2, "cbs");
     duk_pop(ctx);
 
-//    duk_eval_string(ctx, "function _store_cb(cb, stash, ptr, idx){stash['cbs'] = {ptr, cb};}");
-//    duk_eval(ctx);
-
     // run pushed task source
     duk_eval(task->duk_ctx);
-
-//    while (1){
-//        duk_bool_t res = duk_get_global_string(task->duk_ctx, "do_update");
-//        duk_call(task->duk_ctx, 0);
-//        duk_pop(task->duk_ctx);
-//        vTaskDelay(100/portTICK_PERIOD_MS);
-//    }
 
     while (1){
         Callback *cb;
@@ -37,6 +28,7 @@ gui_task_t *run_js_task(const char* src){
     auto *task = new gui_task_t;
     lvgl_port_lock(0);
     task->screen = lv_obj_create(NULL);
+    task->button_group = lv_group_create();
     lvgl_port_unlock();
 
     task->sem = xSemaphoreCreateMutex();
@@ -44,6 +36,7 @@ gui_task_t *run_js_task(const char* src){
     task->event_queue = xQueueCreate(10, sizeof(size_t));
 
     task->next_cb_id = 0;
+    task->is_js = true;
 
     duk_push_string(task->duk_ctx, src);
     xTaskCreate((TaskFunction_t) js_task_loop, "Js task", 10000, task, 1, &task->rtos_task);

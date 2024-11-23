@@ -22,12 +22,14 @@ typedef struct {
     TaskHandle_t rtos_task;
     SemaphoreHandle_t sem; // TODO: use this
     lv_obj_t *screen;
+    lv_group_t *button_group;
     duk_context *duk_ctx;
     int next_cb_id;
     std::unordered_map<int, Callback*> cbs;
     QueueHandle_t event_queue;
+    bool is_js;
+    char name[10];
 
-    // TODO: input event queue
     // TODO: some logging
 } gui_task_t;
 
