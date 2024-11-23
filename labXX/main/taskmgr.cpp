@@ -78,8 +78,7 @@ static void ui_task_button_handler(lv_event_t *e){
 static void add_task(gui_task_t *t){
     tasks.push_back(t);
     auto btn = lv_list_add_btn(ui_task_list, LV_SYMBOL_BULLET, t->name);
-    lv_obj_add_event_cb(btn, ui_task_button_handler,
-                        static_cast<lv_event_code_t>( LV_EVENT_CLICKED ), t);
+    lv_obj_add_event_cb(btn, ui_task_button_handler, LV_EVENT_CLICKED, t);
     lv_group_add_obj(taskmgr_ui_task.button_group, btn);
     lv_obj_set_style_outline_width(btn, 1, LV_STATE_FOCUSED);
     lv_obj_set_style_outline_pad(btn, 1, LV_STATE_FOCUSED);

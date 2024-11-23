@@ -2,7 +2,7 @@
 
 #include "gui.h"
 #include <esp_lvgl_port.h>
-
+#include <esp_log.h>
 
 
 static lv_obj_t *get_lv_obj(duk_context *ctx){
@@ -82,9 +82,16 @@ DUK_BI(lp_bi_lvgl_label_setter){
     return 0;
 }
 
+
+static void button_cb(lv_event_t *e){
+    auto *cb = static_cast<Callback *>(e->user_data);
+    xQueueSend(cb->task->event_queue, &cb, portMAX_DELAY);
+}
+
 DUK_BI(lp_bi_lvgl_button_constructor){
     fprintf(stderr, "Button constructor called!\n");
     duk_require_constructor_call(ctx);
+
 
     lvgl_port_lock(0);
     lv_obj_t *btn = lv_btn_create(ct()->screen);
@@ -96,9 +103,16 @@ DUK_BI(lp_bi_lvgl_button_constructor){
     lv_obj_set_style_pad_gap(btn, 1, 0);
     lv_group_add_obj(ct()->button_group, btn);
 
-    lvgl_port_unlock();
-
+    ESP_LOGI("f", "Before setting obj, top is %d", duk_get_top(ctx));
+    duk_require_callable(ctx, -1);
     set_lv_obj(ctx, btn);
+    ESP_LOGI("f", "After setting obj, top is %d", duk_get_top(ctx));
+    duk_require_callable(ctx, -1);
+
+    auto *cb = new Callback(ct());
+
+    lv_obj_add_event_cb(btn, button_cb, LV_EVENT_CLICKED, cb);
+    lvgl_port_unlock();
 
     return 0;
 }
