@@ -64,6 +64,7 @@ static void switch_task(gui_task_t *task){
     lv_scr_load_anim(task->screen, LV_SCR_LOAD_ANIM_MOVE_LEFT, 300, 0, false);
     lvgl_port_unlock();
     is_edit_mode = false;
+    lv_group_set_editing(active_group, is_edit_mode);
 }
 
 static void ui_task_button_handler(lv_event_t *e){
@@ -100,6 +101,10 @@ void taskmgr_init(){
 
 }
 
+// TODO: do this better
+static uint32_t lv_kl = LV_KEY_DOWN;
+static uint32_t lv_kr = LV_KEY_UP;
+
 
 // EVERYTHING BELOW THIS POINT SHOULD TAKE THE MUTEX
 void taskmgr_handle_key(TASK_KEY key){
@@ -112,6 +117,7 @@ void taskmgr_handle_key(TASK_KEY key){
         }
         if(should_change_mode){
             is_edit_mode = !is_edit_mode;
+            lv_group_set_editing(active_group, is_edit_mode);
         } else{
             ESP_LOGI(TAG, "sending keypress");
 //            lv_group_send_data(active_group, LV_KEY_ENTER);
@@ -122,7 +128,8 @@ void taskmgr_handle_key(TASK_KEY key){
             if(key == TASK_KEY::LEFT) lv_group_focus_prev(active_group);
             else lv_group_focus_next(active_group);
         } else {
-            lv_group_send_data(active_group, key == TASK_KEY::LEFT ? LV_KEY_LEFT : LV_KEY_RIGHT);
+//            lv_group_send_data(active_group, key == TASK_KEY::LEFT ? LV_KEY_LEFT : LV_KEY_RIGHT);
+            if(focused_obj) lv_event_send(focused_obj, LV_EVENT_KEY, key == TASK_KEY::LEFT ? &lv_kl : &lv_kr);
         }
     }
     TM_U();

@@ -48,7 +48,7 @@ public:
     virtual void afterRunHook(){}
 //    virtual void preDestroyHook(){}
 
-    void run();
+    virtual void run();
     virtual ~Callback();
 };
 
