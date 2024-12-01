@@ -3,3 +3,4 @@
 /sdkconfig.bak*
 /cmake-build-*
 .idea
+/main/wifi_creds.h

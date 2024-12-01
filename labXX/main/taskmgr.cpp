@@ -8,6 +8,8 @@
 #include <cstring>
 #include <esp_log.h>
 
+#include "network.h"
+
 //#define TM_L() xSemaphoreTake(taskmgr_lock, portMAX_DELAY)
 //#define TM_U() xSemaphoreGive(taskmgr_lock)
 
@@ -87,7 +89,7 @@ static void add_task(gui_task_t *t){
     lv_obj_set_style_pad_gap(btn, 1, 0);
 }
 
-void taskmgr_init(){
+extern "C" void taskmgr_init(){
 //    taskmgr_lock = xSemaphoreCreateMutex();
 
     lvgl_port_lock(0);
@@ -134,7 +136,7 @@ void taskmgr_handle_key(TASK_KEY key){
     }
     TM_U();
 }
-void taskmgr_show_ui(){
+extern "C" void taskmgr_show_ui(){
     TM_L();
     if(active_group != taskmgr_ui_task.button_group){
         switch_task(&taskmgr_ui_task);
@@ -142,10 +144,54 @@ void taskmgr_show_ui(){
     TM_U();
 }
 
-void taskmgr_run_js(const char* name, const char *code){
+extern "C" void taskmgr_run_js(const char* name, const char *code){
     gui_task_t *task = run_js_task(code);
     TM_L();
     strncpy(task->name, name, 9);
+    task->name[9] = 0;
     add_task(task);
+    TM_U();
+}
+
+
+static void ui_run_prog_button_handler(lv_event_t *e){
+    TM_L();
+    // TODO: this code sucks, it blocks render task
+    char* text = static_cast<char *>(e->user_data);
+    send_rpc(IC("RUN "), text, strlen(text));
+    TM_U();
+}
+
+
+
+extern "C" void taskmgr_update_progs_list(const char* buff, int len){
+    TM_L();
+
+    for (int i = 0; i < lv_obj_get_child_cnt(run_menu_ui_task.screen); i++){
+        lv_obj_del_async(lv_obj_get_child(run_menu_ui_task.screen, i));
+    }
+
+    auto prog_list = lv_list_create(run_menu_ui_task.screen);
+    lv_group_add_obj(run_menu_ui_task.button_group, prog_list);
+    lv_obj_set_x(prog_list, 0);
+    lv_obj_set_y(prog_list, 0);
+    lv_obj_set_height(prog_list, 64);
+    lv_obj_set_width(prog_list, 128);
+
+    int pos = 0;
+    while (pos < len){
+        int l = strlen(buff+pos);
+        auto btn = lv_list_add_btn(prog_list, LV_SYMBOL_PLAY, buff + pos);
+        pos = pos + l + 1;
+
+        lv_obj_add_event_cb(btn, ui_run_prog_button_handler, LV_EVENT_CLICKED, (void *)lv_list_get_btn_text(prog_list, btn));
+        lv_group_add_obj(run_menu_ui_task.button_group, btn);
+        lv_obj_set_style_outline_width(btn, 1, LV_STATE_FOCUSED);
+        lv_obj_set_style_outline_pad(btn, 1, LV_STATE_FOCUSED);
+        lv_obj_set_style_pad_all(btn, 1, 0);
+        lv_obj_set_style_pad_gap(btn, 1, 0);
+    }
+
+
     TM_U();
 }

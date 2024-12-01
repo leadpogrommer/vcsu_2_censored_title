@@ -3,6 +3,9 @@
 #include "network.h"
 #include "esp_websocket_client.h"
 
+#include "taskmgr.h"
+#include "wifi_creds.h"
+
 char * getCurrentTaskName(){
     return pcTaskGetName(NULL);
 }
@@ -26,7 +29,7 @@ static void wifi_event_handler(void *event_handler_arg, esp_event_base_t event_b
     }
     else if (event_id == IP_EVENT_STA_GOT_IP){
         printf("Wifi got IP...\n\n");
-        // connect_to_websocket(); // TODO: connect
+         connect_to_websocket();
     } else{
         printf("Unknown wifi related event %ld\n", event_id);
     }
@@ -39,7 +42,26 @@ static void log_error_if_nonzero(const char *message, int error_code)
     }
 }
 
+static esp_websocket_client_handle_t ws_c;
 
+
+void send_rpc(uint32_t cmd, const char *data, int len){
+    char* buff = malloc(len+4);
+    *(uint32_t *)buff = cmd;
+    memcpy(buff + 4, data, len);
+    esp_websocket_client_send_bin(ws_c, buff, len+4, portMAX_DELAY);
+    free(buff);
+}
+
+
+static void handle_rpc_data(uint32_t cmd, const char *buff, int len){
+    if(cmd == IC("PRGS")){
+        taskmgr_update_progs_list(buff, len);
+    } else if (cmd == IC("RUN ")){
+        ESP_LOG_BUFFER_HEXDUMP(TAG, buff, len, ESP_LOG_INFO);
+        taskmgr_run_js(buff, buff + strlen(buff) + 1);
+    }
+}
 
 static void websocket_event_handler(void *handler_args, esp_event_base_t base, int32_t event_id, void *event_data) {
     ESP_LOGI(TAG, "WS handler running in %s\n", getCurrentTaskName());
@@ -50,6 +72,7 @@ static void websocket_event_handler(void *handler_args, esp_event_base_t base, i
             break;
         case WEBSOCKET_EVENT_CONNECTED:
             ESP_LOGI(TAG, "WEBSOCKET_EVENT_CONNECTED");
+            esp_websocket_client_send_bin(ws_c, "PRGS", 4, portMAX_DELAY);
             break;
         case WEBSOCKET_EVENT_DISCONNECTED:
             ESP_LOGI(TAG, "WEBSOCKET_EVENT_DISCONNECTED");
@@ -64,7 +87,13 @@ static void websocket_event_handler(void *handler_args, esp_event_base_t base, i
             ESP_LOGI(TAG, "WEBSOCKET_EVENT_DATA");
             ESP_LOGI(TAG, "Received opcode=%d", data->op_code);
             if (data->op_code == 0x2) { // Opcode 0x2 indicates binary data
-                ESP_LOG_BUFFER_HEX("Received binary data", data->data_ptr, data->data_len);
+                if(data->data_len < 4){
+                    ESP_LOGE(TAG, "Invalid command");
+                    ESP_LOG_BUFFER_HEX("Received binary data", data->data_ptr, data->data_len);
+                } else{
+                    handle_rpc_data(*(uint32_t*)data->data_ptr, data->data_ptr + 4, data->data_len - 4);
+                }
+                
             } else if (data->op_code == 0x08 && data->data_len == 2) {
                 ESP_LOGW(TAG, "Received closed message with code=%d", 256 * data->data_ptr[0] + data->data_ptr[1]);
             } else {
@@ -93,12 +122,12 @@ static void websocket_event_handler(void *handler_args, esp_event_base_t base, i
 
 static void connect_to_websocket(){
     esp_websocket_client_config_t websocket_cfg = {
-        .uri = "ws://192.168.1.46:8080/ws",
+        .uri = "ws://192.168.2.228:8080/device",
     };
-    esp_websocket_client_handle_t client = esp_websocket_client_init(&websocket_cfg);
-    esp_websocket_client_destroy_on_exit(client);
-    esp_websocket_register_events(client, WEBSOCKET_EVENT_ANY, websocket_event_handler, (void *)client);
-    esp_websocket_client_start(client);
+    ws_c = esp_websocket_client_init(&websocket_cfg);
+    esp_websocket_client_destroy_on_exit(ws_c);
+    esp_websocket_register_events(ws_c, WEBSOCKET_EVENT_ANY, websocket_event_handler, (void *)ws_c);
+    esp_websocket_client_start(ws_c);
 
 }
 
@@ -113,8 +142,8 @@ void connect_to_wifi(){
 
     wifi_config_t wifi_config = {
             .sta={
-                    .ssid = "",
-                    .password = ""
+                    .ssid = WIFI_SSID,
+                    .password = WIFI_PASSWORD,
             }
     };
     ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_STA));
