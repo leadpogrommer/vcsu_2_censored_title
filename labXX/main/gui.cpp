@@ -1,6 +1,7 @@
 #include <gui.h>
 
 #include <esp_lvgl_port.h>
+#include <esp_log.h>
 
 [[noreturn]] static void js_task_loop(gui_task_t *task){
     vTaskSetThreadLocalStoragePointer(nullptr, 0, task);
@@ -23,6 +24,52 @@
     }
 }
 
+static void js_task_cleanup(gui_task_t *task){
+    auto ctx = task->duk_ctx;
+
+    // TODO: lock something
+    // destroy all callbacks
+    // TODO: figure out if it's ok to delete callbacks while we are in a callback
+    // Can't iterate normally: destructor will remove cb from map
+    while (!task->cbs.empty()){
+        auto *cb = task->cbs.begin()->second;
+        delete cb;
+    }
+
+    // destroy event queue
+    vQueueDelete(task->event_queue);
+
+    //  destroy js heap
+    duk_destroy_heap(ctx);
+
+    // destroy RTOS task
+    vTaskDelete(task->rtos_task);
+}
+
+static void task_fatal_error_handler(gui_task_t *task, const char *msg){
+    ESP_LOGE(task->name, "JS Task crashed: %s", msg);
+
+    lvgl_port_lock(0);
+    for (int i = 0; i < lv_obj_get_child_cnt(task->screen); i++){
+        lv_obj_del_async(lv_obj_get_child(task->screen, i));
+    }
+
+    auto lbl = lv_label_create(task->screen);
+    lv_label_set_text(lbl, "Task CRASHED!");
+    lv_obj_set_x(lbl, 0);
+    lv_obj_set_y(lbl, 0);
+
+    lbl = lv_label_create(task->screen);
+    lv_label_set_text(lbl, msg);
+    lv_label_set_long_mode(lbl, LV_LABEL_LONG_WRAP);
+    lv_obj_set_x(lbl, 0);
+    lv_obj_set_y(lbl, 15);
+    lv_obj_set_width(lbl, 128);
+
+    lvgl_port_unlock();
+
+    js_task_cleanup(task);
+}
 
 gui_task_t *run_js_task(const char* src){
     auto *task = new gui_task_t;
@@ -32,7 +79,8 @@ gui_task_t *run_js_task(const char* src){
     lvgl_port_unlock();
 
     task->sem = xSemaphoreCreateMutex();
-    task->duk_ctx = duk_create_heap_default();
+    task->duk_ctx = duk_create_heap(nullptr, nullptr, nullptr, task,
+                                    reinterpret_cast<duk_fatal_function>(task_fatal_error_handler));
     task->event_queue = xQueueCreate(10, sizeof(size_t));
 
     task->next_cb_id = 0;

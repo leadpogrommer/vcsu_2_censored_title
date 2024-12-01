@@ -19,9 +19,6 @@ char dbg_buffer[1024*10];
 
 // TO DOS for fw
 // TODO: task termination
-// TODO: js error handling
-// TODO: digital i/o
-// TODO: demo: LED flasher
 // TODO: demo: matrix
 // TODO: send telemetry (task logs, free heap, rtos task stats)
 
