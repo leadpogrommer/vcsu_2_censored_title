@@ -19,7 +19,6 @@ char dbg_buffer[1024*10];
 
 // TO DOS for fw
 // TODO: task termination
-// TODO: demo: matrix
 // TODO: send telemetry (task logs, free heap, rtos task stats)
 
 extern "C" void app_main() {

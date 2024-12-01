@@ -58,6 +58,7 @@ function update_state(){
     } else {
         // stop
         btn.text = 'Start'
+        digitalWrite(pin, false);
     }
 }
 

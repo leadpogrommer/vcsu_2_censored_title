@@ -37,3 +37,10 @@ btn.x = 10;
 btn.y = 40;
 btn.text = '0'
 
+var btn = new LVGLButton(function () {
+    crash()
+});
+btn.x = 30;
+btn.y = 10;
+btn.text = 'crash'
+

@@ -32,7 +32,7 @@ static void init_button(){
     gpio_reset_pin(btn_pin);
     gpio_set_pull_mode(btn_pin, GPIO_PULLUP_ONLY);
     gpio_set_direction(btn_pin, GPIO_MODE_INPUT);
-    gpio_set_intr_type(btn_pin, GPIO_INTR_ANYEDGE);
+//    gpio_set_intr_type(btn_pin, GPIO_INTR_ANYEDGE);
 }
 
 #define TAG "imgr"
