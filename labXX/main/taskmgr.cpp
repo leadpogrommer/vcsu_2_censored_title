@@ -150,6 +150,7 @@ extern "C" void taskmgr_run_js(const char* name, const char *code){
     strncpy(task->name, name, 9);
     task->name[9] = 0;
     add_task(task);
+    switch_task(task);
     TM_U();
 }
 

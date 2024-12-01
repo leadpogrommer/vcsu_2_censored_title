@@ -58,13 +58,13 @@ static void handle_rpc_data(uint32_t cmd, const char *buff, int len){
     if(cmd == IC("PRGS")){
         taskmgr_update_progs_list(buff, len);
     } else if (cmd == IC("RUN ")){
-        ESP_LOG_BUFFER_HEXDUMP(TAG, buff, len, ESP_LOG_INFO);
+        // ESP_LOG_BUFFER_HEXDUMP(TAG, buff, len, ESP_LOG_INFO);
         taskmgr_run_js(buff, buff + strlen(buff) + 1);
     }
 }
 
 static void websocket_event_handler(void *handler_args, esp_event_base_t base, int32_t event_id, void *event_data) {
-    ESP_LOGI(TAG, "WS handler running in %s\n", getCurrentTaskName());
+    // ESP_LOGI(TAG, "WS handler running in %s\n", getCurrentTaskName());
     esp_websocket_event_data_t *data = (esp_websocket_event_data_t *)event_data;
     switch (event_id) {
         case WEBSOCKET_EVENT_BEGIN:
@@ -84,24 +84,26 @@ static void websocket_event_handler(void *handler_args, esp_event_base_t base, i
             }
             break;
         case WEBSOCKET_EVENT_DATA:
-            ESP_LOGI(TAG, "WEBSOCKET_EVENT_DATA");
-            ESP_LOGI(TAG, "Received opcode=%d", data->op_code);
+            // ESP_LOGI(TAG, "WEBSOCKET_EVENT_DATA");
+            // ESP_LOGI(TAG, "Received opcode=%d", data->op_code);
             if (data->op_code == 0x2) { // Opcode 0x2 indicates binary data
+                ESP_LOGI(TAG, "Received COMMAND blob");
+                ESP_LOG_BUFFER_HEXDUMP(TAG, data->data_ptr, data->data_len, ESP_LOG_INFO);
                 if(data->data_len < 4){
                     ESP_LOGE(TAG, "Invalid command");
-                    ESP_LOG_BUFFER_HEX("Received binary data", data->data_ptr, data->data_len);
+                    
                 } else{
                     handle_rpc_data(*(uint32_t*)data->data_ptr, data->data_ptr + 4, data->data_len - 4);
                 }
                 
             } else if (data->op_code == 0x08 && data->data_len == 2) {
-                ESP_LOGW(TAG, "Received closed message with code=%d", 256 * data->data_ptr[0] + data->data_ptr[1]);
+                // ESP_LOGW(TAG, "Received closed message with code=%d", 256 * data->data_ptr[0] + data->data_ptr[1]);
             } else {
-                ESP_LOGW(TAG, "Received=%.*s\n\n", data->data_len, (char *)data->data_ptr);
+                // ESP_LOGW(TAG, "Received=%.*s\n\n", data->data_len, (char *)data->data_ptr);
             }
 
 
-            ESP_LOGW(TAG, "Total payload length=%d, data_len=%d, current payload offset=%d\r\n", data->payload_len, data->data_len, data->payload_offset);
+            // ESP_LOGW(TAG, "Total payload length=%d, data_len=%d, current payload offset=%d\r\n", data->payload_len, data->data_len, data->payload_offset);
 
             break;
         case WEBSOCKET_EVENT_ERROR:
@@ -123,6 +125,7 @@ static void websocket_event_handler(void *handler_args, esp_event_base_t base, i
 static void connect_to_websocket(){
     esp_websocket_client_config_t websocket_cfg = {
         .uri = "ws://192.168.2.228:8080/device",
+        .buffer_size = 3072,
     };
     ws_c = esp_websocket_client_init(&websocket_cfg);
     esp_websocket_client_destroy_on_exit(ws_c);
