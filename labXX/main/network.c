@@ -124,7 +124,7 @@ static void websocket_event_handler(void *handler_args, esp_event_base_t base, i
 
 static void connect_to_websocket(){
     esp_websocket_client_config_t websocket_cfg = {
-        .uri = "ws://192.168.2.228:8080/device",
+        .uri = "ws://"CNC_IP_PORT"/device",
         .buffer_size = 3072,
     };
     ws_c = esp_websocket_client_init(&websocket_cfg);

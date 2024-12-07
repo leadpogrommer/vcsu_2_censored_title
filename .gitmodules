@@ -1,3 +1,7 @@
 [submodule "labXX/components/esp32-rotary-encoder"]
 	path = labXX/components/esp32-rotary-encoder
 	url = https://github.com/leadpogrommer/esp32-rotary-encoder.git
+[submodule "labXX/thirdparty/duktape"]
+	path = labXX/thirdparty/duktape
+	url = https://github.com/leadpogrommer/duktape.git
+	branch = leadpogrommers_shit
