@@ -29,6 +29,7 @@ typedef struct {
     QueueHandle_t event_queue;
     bool is_js;
     char name[10];
+    int tid;
 
     // TODO: some logging
 } gui_task_t;

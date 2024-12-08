@@ -11,6 +11,7 @@
 #include "display.h"
 #include "taskmgr.h"
 #include "network.h"
+#include "telemetry.h"
 
 #define TAG "main"
 
@@ -30,6 +31,10 @@ extern "C" void app_main() {
     connect_to_wifi();
     taskmgr_init();
     start_input_manager();
+
+    // This does not return
+    telemetry_task();
+
 
 
 //    taskmgr_run_js("sb", "var lbl = new LVGLLabel();\n\nvar b = new LVGLButton(function f(){\n   print('button pressed'); \n});\nb.x = 70;\nb.y = 15;\nb.text = 'Btn';\n\nvar sb = new LVGLSpinbox(function (v){\n    lbl.text = 'Value is ' + v;\n}, 10, 90, 7, 2);\n\nsb.y = 30;\nsb.x = 15;\nsb.w = 40;");

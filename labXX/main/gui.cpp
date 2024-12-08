@@ -3,6 +3,8 @@
 #include <esp_lvgl_port.h>
 #include <esp_log.h>
 
+static int next_tid = 1;
+
 [[noreturn]] static void js_task_loop(gui_task_t *task){
     vTaskSetThreadLocalStoragePointer(nullptr, 0, task);
 
@@ -76,6 +78,7 @@ gui_task_t *run_js_task(const char* src){
     lvgl_port_lock(0);
     task->screen = lv_obj_create(NULL);
     task->button_group = lv_group_create();
+    task->tid = next_tid++;
     lvgl_port_unlock();
 
     task->sem = xSemaphoreCreateMutex();

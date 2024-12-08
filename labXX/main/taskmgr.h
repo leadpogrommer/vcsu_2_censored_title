@@ -7,7 +7,12 @@ enum class TASK_KEY{
     LEFT, RIGHT, BUTTON
 };
 
+#include <string>
+
+std::string taskmgr_dump_tasks();
 void taskmgr_handle_key(TASK_KEY key);
+
+
 
 extern "C" {
 #endif
@@ -15,7 +20,7 @@ extern "C" {
 
 
 
-
+void taskmgr_handle_key_int(int key);
 
 void taskmgr_show_ui();
 void taskmgr_init();

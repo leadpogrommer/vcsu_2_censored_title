@@ -136,6 +136,10 @@ void taskmgr_handle_key(TASK_KEY key){
     }
     TM_U();
 }
+extern "C" void taskmgr_handle_key_int(int key){
+    taskmgr_handle_key((TASK_KEY)key);
+}
+
 extern "C" void taskmgr_show_ui(){
     TM_L();
     if(active_group != taskmgr_ui_task.button_group){
@@ -195,4 +199,21 @@ extern "C" void taskmgr_update_progs_list(const char* buff, int len){
 
 
     TM_U();
+}
+
+std::string taskmgr_dump_tasks(){
+    TM_L();
+
+    std::string res;
+    for(auto task: tasks){
+        if(!task->is_js) continue;
+        res += std::to_string(task->tid);
+        res += ';';
+        res += task->name;
+        res += '/';
+    }
+
+    TM_U();
+
+    return res;
 }
