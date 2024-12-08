@@ -1,6 +1,9 @@
+from io import BytesIO
+
 from websockets import ConnectionClosedError
 from websockets.asyncio.server import ServerConnection
 import cnc
+from PIL import Image
 # from cnc import front_man
 
 
@@ -42,6 +45,13 @@ class DevMan:
         print(f'Sending key {key} to {did}')
         await self.send_cmd(did, 'KEY ', key.to_bytes(4, byteorder='little'))
 
+    async def device_send_switch_task(self, did: int, tid: int):
+        await self.send_cmd(did, 'SWIT', tid.to_bytes(4, byteorder='little'))
+
+    async def device_send_kill_task(self, did: int, tid: int):
+        await self.send_cmd(did, 'KILL', tid.to_bytes(4, byteorder='little'))
+
+
     async def send_prog_list_to_device(self, did: int, progs: list[str]):
         resp = bytearray()
         for prog in progs:
@@ -67,13 +77,27 @@ class DevMan:
                 await self.send_prog_list_to_device(did, cnc.prog_man.get_prog_list())
             case 'TSKS':
                 res = []
-                print('ddd', data.decode())
+                # print('ddd', data.decode())
                 for pair in data.decode().split('/'):
                     if pair == '':
                         continue
                     tid, name = pair.split(';')
-                    res.append({'tid': tid, 'name': name})
+                    res.append({'tid': int(tid), 'name': name})
                 await cnc.front_man.broadcast(cnc.front_man.front_send_task_list, did, res)
+            case 'HEAP':
+                total_free, largest_free = map(int, data.decode().split(';'))
+                await cnc.front_man.broadcast(cnc.front_man.front_send_heap_info, did, total_free, largest_free)
+            case 'SHOT':
+                # uncomp_data = bytearray([0]*128*64)
+                # for i in range(len(uncomp_data)):
+                #     bi = i // 8
+                #     bpos = i % 8
+                #     uncomp_data[i] = (data[bpos] >> bi) & 0b1
+                img = Image.frombytes('1', (128, 64), data)
+                io = BytesIO()
+                img.save(io, 'PNG')
+                # img.show()
+                await cnc.front_man.broadcast(cnc.front_man.front_send_screenshot, did, io.getvalue())
             case _:
                 print(f'Device {did} sent unknown command: {cmd}')
 

@@ -1,4 +1,6 @@
 import json
+from base64 import b64encode
+from typing import Callable, TypeVar, ParamSpec
 
 from websockets import ConnectionClosedError
 from websockets.asyncio.server import ServerConnection
@@ -39,6 +41,10 @@ class FrontMan:
                 await cnc.dev_man.device_send_key(payload['did'], payload['data'] )
             case 'run':
                 await cnc.dev_man.device_run_prog(payload['did'], payload['data'])
+            case 'switch':
+                await cnc.dev_man.device_send_switch_task(payload['did'], payload['data'])
+            case 'end':
+                await cnc.dev_man.device_send_kill_task(payload['did'], payload['data'])
 
 
         print(f'Got message from front: {payload}')
@@ -59,6 +65,15 @@ class FrontMan:
 
     async def front_send_task_list(self, id, did: int, data: dict):
         await self.front_conns[id].send(json.dumps({'what': 'tasks', 'did': did, 'data': data}))
+
+    async def front_send_heap_info(self, id: int, did: int, total_free: int, largest_free: int):
+        await self.front_conns[id].send(json.dumps({'what': 'heap', 'did': did, 'data': {'total_free': total_free, 'largest_free': largest_free}}))
+
+    async def front_send_screenshot(self, id: int, did: int, png_data: bytes):
+        await self.front_conns[id].send(json.dumps({'what': 'img', 'did': did, 'data': b64encode(png_data).decode()}))
+
+
+
 
 
 

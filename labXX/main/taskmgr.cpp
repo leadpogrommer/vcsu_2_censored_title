@@ -60,10 +60,14 @@ static void init_run_ui(){
     strcpy(run_menu_ui_task.name, "Run");
 }
 
-static void switch_task(gui_task_t *task){
+static void switch_task(gui_task_t *task, bool animate = true){
     lvgl_port_lock(0);
     active_group = task->button_group;
-    lv_scr_load_anim(task->screen, LV_SCR_LOAD_ANIM_MOVE_LEFT, 300, 0, false);
+    if(animate){
+        lv_scr_load_anim(task->screen, LV_SCR_LOAD_ANIM_MOVE_LEFT, 300, 0, false);
+    } else {
+        lv_scr_load(task->screen);
+    }
     lvgl_port_unlock();
     is_edit_mode = false;
     lv_group_set_editing(active_group, is_edit_mode);
@@ -153,6 +157,7 @@ extern "C" void taskmgr_run_js(const char* name, const char *code){
     TM_L();
     strncpy(task->name, name, 9);
     task->name[9] = 0;
+    task->is_js = true;
     add_task(task);
     switch_task(task);
     TM_U();
@@ -216,4 +221,45 @@ std::string taskmgr_dump_tasks(){
     TM_U();
 
     return res;
+}
+
+void taskmgr_switc_task_id(int tid){
+    TM_L();
+    for(auto task: tasks){
+       if(task->tid == tid){
+        switch_task(task);
+        break;
+       }
+    }
+    TM_U();
+}
+
+void taskmgr_kill_task_id(int tid){
+    TM_L();
+
+    int to_del = -1;
+    for(int i = 0; i < tasks.size(); i++){
+       if(tasks[i]->tid == tid){
+        to_del = i;
+        break;
+       }
+    }
+
+
+    if(to_del != -1){
+
+        for(int i = 0; i < lv_obj_get_child_cnt(ui_task_list); i++){
+            auto btn = lv_obj_get_child(ui_task_list, i);
+            if(lv_obj_get_event_user_data(btn, ui_task_button_handler) == tasks[to_del]){
+                lv_obj_del(btn);
+                break;
+            }
+        }
+
+        switch_task(&run_menu_ui_task, false);
+        kill_task(tasks[to_del]);
+        tasks.erase(tasks.begin() + to_del);
+    }
+
+    TM_U();
 }

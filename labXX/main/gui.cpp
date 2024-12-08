@@ -27,6 +27,8 @@ static int next_tid = 1;
 }
 
 static void js_task_cleanup(gui_task_t *task){
+    ESP_LOGI("GUI", "Running js task cleanup");
+
     auto ctx = task->duk_ctx;
 
     // TODO: lock something
@@ -43,6 +45,13 @@ static void js_task_cleanup(gui_task_t *task){
 
     //  destroy js heap
     duk_destroy_heap(ctx);
+
+    task->need_js_cleanup = false;
+
+    if(task->rtos_task == xTaskGetCurrentTaskHandle()){
+        // TODO: ensure that mutex is free
+        ESP_LOGW("GUI", "Gui task is committing suicide, may cause deadlock");
+    }
 
     // destroy RTOS task
     vTaskDelete(task->rtos_task);
@@ -79,9 +88,10 @@ gui_task_t *run_js_task(const char* src){
     task->screen = lv_obj_create(NULL);
     task->button_group = lv_group_create();
     task->tid = next_tid++;
+    task->need_js_cleanup = true;
     lvgl_port_unlock();
 
-    task->sem = xSemaphoreCreateMutex();
+    // task->sem = xSemaphoreCreateMutex();
     task->duk_ctx = duk_create_heap(nullptr, nullptr, nullptr, task,
                                     reinterpret_cast<duk_fatal_function>(task_fatal_error_handler));
     task->event_queue = xQueueCreate(10, sizeof(size_t));
@@ -93,6 +103,20 @@ gui_task_t *run_js_task(const char* src){
     xTaskCreate((TaskFunction_t) js_task_loop, "Js task", 10000, task, 1, &task->rtos_task);
 
     return task;
+}
+
+void kill_task(gui_task_t *task){
+    lvgl_port_lock(0);
+
+    if(task->need_js_cleanup){
+        js_task_cleanup(task);
+    }
+
+    lv_obj_del(task->screen);
+    lv_group_del(task->button_group);
+    delete task;
+
+    lvgl_port_unlock();
 }
 
 

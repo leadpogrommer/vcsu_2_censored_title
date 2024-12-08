@@ -27,6 +27,8 @@ void taskmgr_init();
 void taskmgr_run_js(const char* name, const char *code);
 
 void taskmgr_update_progs_list(const char* buff, int len);
+void taskmgr_switc_task_id(int tid);
+void taskmgr_kill_task_id(int tid);
 
 #ifdef __cplusplus
 }

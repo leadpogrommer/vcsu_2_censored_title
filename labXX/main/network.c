@@ -62,6 +62,10 @@ static void handle_rpc_data(uint32_t cmd, const char *buff, int len){
         taskmgr_run_js(buff, buff + strlen(buff) + 1);
     } else if (cmd == IC("KEY ")){
         taskmgr_handle_key_int(*(int32_t*)buff);
+    } else if(cmd == IC("SWIT")){
+        taskmgr_switc_task_id(*(int32_t*)buff);
+    }else if(cmd == IC("KILL")){
+        taskmgr_kill_task_id(*(int32_t*)buff);
     }
 }
 

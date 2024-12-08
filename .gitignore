@@ -4,3 +4,4 @@
 /i2c_example
 .idea
 /duktape_test
+__pycache__

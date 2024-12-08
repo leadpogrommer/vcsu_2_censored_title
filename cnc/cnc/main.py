@@ -6,6 +6,7 @@ import json
 import websockets
 from websockets.asyncio.server import ServerConnection
 
+import cnc
 from cnc import dev_man, front_man
 
 
@@ -22,6 +23,7 @@ async def ws_handler(ws: ServerConnection):
 
 async def main():
     s = await websockets.serve(ws_handler, '0.0.0.0', 8080)
+    asyncio.ensure_future(cnc.prog_man.watch_files())
     await s.serve_forever()
 
 if __name__ == '__main__':

@@ -33,9 +33,10 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return chi.ChicagoApp(
-      title: 'Flutter Demo',
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      title: 'С&C ui',
+      home: const MyHomePage(title: 'С&C ui'),
     );
   }
 }
@@ -62,15 +63,44 @@ class DevicePage extends StatelessWidget {
       Icons.arrow_right
     ];
 
-    return Row(
+    final streams = repo.getDeviceStreams(id);
+    const scale = 2.0;
+    const w = 128 * scale;
+    const h = 64 * scale;
+
+    return Column(
       children: [
-        for (int i = 0; i < keyIcons.length; i++)
-          IconButton(
-            icon: Icon(keyIcons[i]),
-            onPressed: () {
-              repo.sendKey(id, keyCodes[i]);
-            },
-          ),
+        StreamBuilder(
+            stream: streams.image,
+            builder: (context, snapshot) {
+              final data = snapshot.data;
+
+              if (data == null) {
+                return const SizedBox(
+                  width: w,
+                  height: h,
+                  child: Center(
+                    child: Text('Image not availbale'),
+                  ),
+                );
+              }
+
+              return chi.BorderPane(
+                child:
+                    Image.memory(data, scale: 1 / scale, gaplessPlayback: true),
+              );
+            }),
+        Row(
+          children: [
+            for (int i = 0; i < keyIcons.length; i++)
+              IconButton(
+                icon: Icon(keyIcons[i]),
+                onPressed: () {
+                  repo.sendKey(id, keyCodes[i]);
+                },
+              ),
+          ],
+        ),
       ],
     );
   }
@@ -88,12 +118,6 @@ class DevicePage extends StatelessWidget {
             itemBuilder: (context, index) {
               return ListTile(
                 title: Text(data[index]),
-                trailing: IconButton(
-                  icon: Icon(Icons.delete),
-                  onPressed: () {
-                    // TODO: delete (or not)
-                  },
-                ),
                 onTap: () {
                   repo.runProg(id, data[index]);
                   Navigator.of(context).pop();
@@ -122,11 +146,55 @@ class DevicePage extends StatelessWidget {
       body: Column(
         children: [
           Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text("Connection #$id"),
-              VerticalDivider(),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  Text(
+                    "Connection #$id",
+                    style: TextStyle(fontSize: 30),
+                  ),
+                  StreamBuilder(
+                      stream: repo.getDeviceStreams(id).heapInfo,
+                      builder: (context, snapshot) {
+                        final data = snapshot.data ?? {};
+                        final txt = data.entries
+                            .map(
+                                (e) => "${e.key}: ${(e.value / 1024).floor()}K")
+                            .join("\n");
+                        return Text(txt);
+                      }),
+                  // Spacer()
+                ],
+              ),
+              Spacer(),
               buildControls(context),
             ],
+          ),
+          Divider(),
+          Expanded(
+            child: StreamBuilder(
+              stream: repo.getDeviceStreams(id).taskInfo,
+              builder: (context, snapshot) {
+                final data = snapshot.data ?? [];
+                return ListView.builder(
+                  itemCount: data.length,
+                  itemBuilder: (context, index) {
+                    final task = data[index];
+                    return ListTile(
+                      title: Text("${task.id}: ${task.name}"),
+                      onTap: ()=>repo.switchTask(id, task.id),
+                      trailing: IconButton(
+                        icon: Icon(Icons.delete),
+                        onPressed: () => repo.endTask(id, task.id),
+                      ),
+                    );
+                  },
+                );
+              }
+            ),
           )
         ],
       ),

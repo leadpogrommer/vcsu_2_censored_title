@@ -20,7 +20,7 @@ class Callback;
 
 typedef struct {
     TaskHandle_t rtos_task;
-    SemaphoreHandle_t sem; // TODO: use this
+    // SemaphoreHandle_t sem; // TODO: use this
     lv_obj_t *screen;
     lv_group_t *button_group;
     duk_context *duk_ctx;
@@ -30,6 +30,7 @@ typedef struct {
     bool is_js;
     char name[10];
     int tid;
+    bool need_js_cleanup;
 
     // TODO: some logging
 } gui_task_t;
@@ -55,4 +56,4 @@ public:
 
 
 gui_task_t *run_js_task(const char* src);
-
+void kill_task(gui_task_t *task);
