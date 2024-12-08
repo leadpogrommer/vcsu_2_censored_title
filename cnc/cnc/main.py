@@ -6,8 +6,7 @@ import json
 import websockets
 from websockets.asyncio.server import ServerConnection
 
-from cnc import dev_man
-
+from cnc import dev_man, front_man
 
 
 async def ws_handler(ws: ServerConnection):
@@ -15,6 +14,8 @@ async def ws_handler(ws: ServerConnection):
     print(f'Got connection from {ws.remote_address} on path {ws.request.path}')
     if path == '/device':
         await dev_man.on_new_device(ws)
+    elif path == '/front':
+        await front_man.on_new_device(ws)
     else:
         print('Unknown path')
 

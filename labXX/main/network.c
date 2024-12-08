@@ -60,6 +60,8 @@ static void handle_rpc_data(uint32_t cmd, const char *buff, int len){
     } else if (cmd == IC("RUN ")){
         // ESP_LOG_BUFFER_HEXDUMP(TAG, buff, len, ESP_LOG_INFO);
         taskmgr_run_js(buff, buff + strlen(buff) + 1);
+    } else if (cmd == IC("KEY ")){
+        taskmgr_handle_key_int(*(int32_t*)buff);
     }
 }
 
