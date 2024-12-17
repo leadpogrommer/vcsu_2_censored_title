@@ -22,10 +22,10 @@ Duktape позволяет достаточно легко добавлять н
 - [main.cpp](labXX/main/main.cpp) - main, инициализирует все
 - [display.c](labXX/main/display.c) - инициализирует lvgl и i2c дисплей
 - [network.c](labXX/main/network.c) - управляет wifi и websocket соединениями, пытается их переподключать, если отваливаются, обрабатывает rpc запросы от бэкенда (`handle_rpc_data`)
-- [input.cpp](labXX/main/input.cpp) - обрабатывает события с энуодера (использует third party компонент) и кнопки
+- [input.cpp](labXX/main/input.cpp) - обрабатывает события с энкодера (использует third party компонент) и кнопки
 - [telemetry.cpp](labXX/main/telemetry.cpp) - отсылает на бэк скриншот, список задач и объём свободной памяти в куче раз в 500 мс
 - [gui.cpp](labXX/main/gui.cpp) - Создание/удаление JS тасок, а так же JS event loop
-- [taskmgr.cpp](labXX/main/taskmgr.cpp) - Высокоуровневое (относительно `gui.cpp`) управление тасками. Хранит список запущенных тасок, млдержит логику для добавления, удаления и переключения тасок, передачи ввода активной таске.
+- [taskmgr.cpp](labXX/main/taskmgr.cpp) - Высокоуровневое (относительно `gui.cpp`) управление тасками. Хранит список запущенных тасок, содержит логику для добавления, удаления и переключения тасок, передачи ввода активной таске.
 - [bindings_gui.cpp](labXX/main/bindings_gui.cpp) - JS биндинги для к частям LVGL
 - [bindings_timeout.cpp](labXX/main/bindings_timeout.cpp) - реализация `setTimeout` и `print`
 - [bindings_io.cpp](labXX/main/bindings_io.cpp) - реализация `digitalRead` и `digitalWrite`
